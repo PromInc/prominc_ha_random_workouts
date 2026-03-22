@@ -1,0 +1,11 @@
+pick_random:
+  name: Pick Random Workout
+  description: Selects a random workout from the configured JSON lists, updates the dashboard sensor, and optionally plays it on a media player.
+  fields:
+    entity_id:
+      name: Media Player
+      description: The smart TV or media player where the workout video should be played.
+      required: false
+      selector:
+        entity:
+          domain: media_player
