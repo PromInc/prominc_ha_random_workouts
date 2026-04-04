@@ -3,6 +3,7 @@
   "name": "PromInc Random Workouts",
   "codeowners": ["@PromInc"],
   "config_flow": true,
+  "reconfigure": true,
   "documentation": "https://github.com/PromInc/prominc_ha_random_workouts",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/PromInc/prominc_ha_random_workouts/issues",

@@ -3,7 +3,15 @@
     "step": {
       "user": {
         "data": {
-          "json_urls": "Workout Lists (Name|URL)"
+          "category_name": "Category Name (e.g. Yoga)",
+          "json_url": "Workout List JSON URL"
+        }
+      },
+      "reconfigure": {
+        "title": "Update Workout Settings",
+        "data": {
+          "category_name": "Category Name",
+          "json_url": "JSON URL"
         }
       }
     }

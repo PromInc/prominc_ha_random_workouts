@@ -29,25 +29,24 @@ async def async_setup_entry(hass: HomeAssistant, entry):
         category_target = call.data.get("category", "").strip().lower()
         media_player = call.data.get("entity_id")
 
-        raw_urls = entry.data.get(CONF_JSON_URLS, "")
+        category = entry.data.get("category_name","").strip()
+        url = entry.data.get("json_url","").strip()
 
-        _LOGGER.error("bprom test: checkpoint 1")
-        _LOGGER.error("raw_urls: %s", raw_urls)
-        _LOGGER.error("category_target: %s", category_target)
+        # TODO: delete me
+        _LOGGER.debug("category: %s", category)
+        _LOGGER.debug("url: %s", url)
+        _LOGGER.debug("category_target: %s", category_target)
 
         url_map = {}
-        for line in raw_urls.split("\n"):
-            if "|" in line:
-                name, url = line.split("|", 1)
-                _LOGGER.error("name: %s", name)
-                _LOGGER.error("url: %s", url)
-                url_map[name.strip().lower()] = url.strip()
 
-        _LOGGER.error("url_map: %s", url_map)
+        url_map[category] = url
+
+
+        _LOGGER.debug("url_map: %s", url_map)
 
         target_url = url_map.get(category_target)
 
-        _LOGGER.error("target_url: %s", target_url)
+        _LOGGER.debug("target_url: %s", target_url)
 
         if not target_url:
             _LOGGER.error("Category %s not found in config", category_target)

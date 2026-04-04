@@ -87,5 +87,42 @@ python validate_workouts.py your-list-4.json.
 
 ## Changelog
 
+### 1.0.1
+- Improve entity creation to accept 2 fields vs pipe delinated.
+- Ability to edit an entity configuration
+
 ### 1.0.0
 - Initial release
+
+
+## Roadmap / TODOs
+
+### Entites
+1. [DONE v1.0.1] Ability to define the category and JSON path in different fields
+2. Category name is case sensitive.  This should be removed/avoided.
+
+### Automation
+1. When adding to an automation, need to be able to specify the category
+2. Pause vieo upon load
+3. Can we avoid playing ads in anyway? (is this an issue?)
+
+### Dashboards
+1. Does this work?
+
+### Validation Script
+1. Match the format that I use in JSON - not the format that the script is currently formatting to
+
+### Integration Image
+Historically, you have to submit your image to a global repo that the image will be pulled from.
+https://developers.home-assistant.io/blog/2020/05/08/logos-custom-integrations/
+
+As of 2026.3 it can instead be added to the integration itself!  (I like this)
+https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
+
+### Documentation
+Some exists, does it need improvement??
+1. How to build/structure JSON files
+2. Example automation YAML
+3. Example dashboard YAML
+4. Example on how to validate JSON
+

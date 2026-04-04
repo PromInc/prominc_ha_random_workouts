@@ -4,13 +4,12 @@ from .const import DOMAIN, CONF_JSON_URLS
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-	raw_urls = entry.data.get(CONF_JSON_URLS, "")
+	category = entry.data.get("category_name","").strip()
+	url = entry.data.get("json_url","").strip()  
+  
 	entities = []
 
-	for line in raw_urls.split("\n"):
-		if "|" in line:
-			name, url = line.split("|", 1)
-			entities.append(WorkoutCategorySensor(name.strip(), url.strip()))
+	entities.append(WorkoutCategorySensor(category, url))
 
 	async_add_entities(entities)
 
