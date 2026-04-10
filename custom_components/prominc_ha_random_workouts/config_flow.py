@@ -7,12 +7,16 @@ class PromIncRandomWorkoutsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Handle the initial setup flow."""
         errors = {}
         if user_input is not None:
-            # We use the Category Name as the title of the integration entry
+            category_id = user_input["category_name"].strip().lower()
+
+            # prevents duplicates
+            await self.async_set_unique_id(category_id)
+            self._abort_if_unique_id_configured()
+
             return self.async_create_entry(
-                title=user_input["category_name"], 
+                title=user_input["category_name"],
                 data=user_input
             )
 
@@ -23,8 +27,8 @@ class PromIncRandomWorkoutsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         })
 
         return self.async_show_form(
-            step_id="user", 
-            data_schema=data_schema, 
+            step_id="user",
+            data_schema=data_schema,
             errors=errors
         )
 

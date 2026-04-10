@@ -4,17 +4,6 @@ import random
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import entity_registry as er
-
-from .const import DOMAIN, CONF_JSON_URLS
-
-_LOGGER = logging.getLogger(__name__)
-
-# TODO: clean up debug loggingimport logging
-import random
-
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-
 from .const import DOMAIN, CONF_JSON_URLS
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,51 +15,43 @@ async def async_setup_entry(hass: HomeAssistant, entry):
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     async def pick_random_workout(call: ServiceCall):
+        # 1. Get the category requested by the user
         category_target = call.data.get("category", "").strip().lower()
         media_player = call.data.get("entity_id")
 
-        category = entry.data.get("category_name","").strip()
-        url = entry.data.get("json_url","").strip()
+        # 2. SCAN ALL ENTRIES for the matching category
+        target_url = None
+        all_entries = hass.config_entries.async_entries(DOMAIN)
 
-        # TODO: delete me
-        _LOGGER.debug("category: %s", category)
-        _LOGGER.debug("url: %s", url)
-        _LOGGER.debug("category_target: %s", category_target)
+        for e in all_entries:
+            # Check the 'category_name' in each config entry's data
+            e_category = e.data.get("category_name", "").strip().lower()
 
-        url_map = {}
+            _LOGGER.debug("e_category: %s", e_category)
 
-        url_map[category] = url
-
-
-        _LOGGER.debug("url_map: %s", url_map)
-
-        target_url = url_map.get(category_target)
-
-        _LOGGER.debug("target_url: %s", target_url)
+            if e_category == category_target:
+                target_url = e.data.get("json_url")
+                break
 
         if not target_url:
-            _LOGGER.error("Category %s not found in config", category_target)
+            _LOGGER.error("Category '%s' not found in any integration entry", category_target)
             return
 
-        # session = async_get_clientsession(hass)
-        # async with session.get(target_url) as response:
-            # workouts = await response.json()
-        # workout = random.choice(workouts)
-
+        # 3. Fetch JSON
         session = async_get_clientsession(hass)
         try:
-            _LOGGER.error("Attempting to fetch workout list from: %s", target_url)
-            
+            _LOGGER.debug("Attempting to fetch workout list from: %s", target_url)
+
             async with session.get(target_url, timeout=10) as response:
                 # Capture the raw text first for debugging
                 raw_text = await response.text()
-                _LOGGER.error("Raw response from server: %s", raw_text)
+                _LOGGER.debug("Raw response from server: %s", raw_text)
 
                 if response.status != 200:
                     _LOGGER.error(
-                        "Failed to fetch JSON. Status: %s. Response: %s", 
+                        "Failed to fetch JSON. Status: %s. Response (truncated): %s", 
                         response.status, 
-                        raw_text[:100] # Log only the first 100 chars to avoid bloat
+                        raw_text[:100]
                     )
                     return
 
@@ -80,101 +61,37 @@ async def async_setup_entry(hass: HomeAssistant, entry):
                 except Exception as json_err:
                     _LOGGER.error("JSON parsing failed. Raw text was: %s. Error: %s", raw_text, json_err)
                     return
-                
-                _LOGGER.error("collection type: %s", type(collection))
 
                 if not collection or not isinstance(collection, dict):
                     _LOGGER.error("JSON structure is invalid or empty: collection. Expected a dict {}.")
                     return
 
                 workouts = collection.get("entities",{})
-
                 if not workouts or not isinstance(workouts, list):
                     _LOGGER.error("JSON structure is invalid or empty: workouts. Expected a list [].")
                     return
 
                 workout = random.choice(workouts)
-                _LOGGER.error("Successfully picked workout: %s", workout.get("ytId"))
+                _LOGGER.info("Successfully picked workout: %s", workout.get("ytId"))
 
-                # ... (rest of the event firing and media player logic)
-        
         except Exception as e:
             _LOGGER.error("Unexpected error in pick_random_workout: %s", str(e))
 
-
         workoutUrl = str( "https://www.youtube.com/watch?v=" ) + str( workout.get("ytId") )
-
-        _LOGGER.error("workoutUrl: %s", workoutUrl)
-        
-        # TODO: support startTime on URL
-        
         workout["url"] = workoutUrl
-
 
         hass.bus.async_fire(
             f"{DOMAIN}_update_{category_target}",
             {
-                # "title": workout.get("title"),
                 "title": "TODO",
-                # "video_url": workout.get("url"),
-                # "video_id": workout.get("url").split("v=")[-1]
-                # if "v=" in workout.get("url")
-                # else "",
                 "video_id": workout.get("ytId"),
-                # "video_url": str( "https://www.youtube.com/watch?v=" ) + str( workout.get("ytId") ),
                 "video_url": workoutUrl,
             },
         )
 
-        # TODO: revist this.  Can we detect what type of media  player is being used and use the appropriate logic call?
-        # if media_player:
-            # await hass.services.async_call(
-                # "media_player",
-                # "play_media",
-                # {
-                    # "entity_id": media_player,
-                    # "media_content_id": workout.get("url"),
-                    # "media_content_type": "url",
-                # },
-            # )
-
-
-        # Automation path: Play on Roku YouTube App
-        # if media_player:
-            # # Roku expects: media_content_id: "837,VIDEO_ID"
-            # # and media_content_type: "app"
-            # await hass.services.async_call(
-              # "media_player",
-              # "play_media",
-              # {
-                # "entity_id": media_player,
-                # # "media_content_id": f"837,{video_id}",
-                # "media_content_id": f"837,{workout.get("ytId")}",
-                # "media_content_type": "app"
-              # }
-            # )
-
-        # Automation path: Play on Roku YouTube App (ID: 837)
-        # if media_player:
-            # await hass.services.async_call("media_player", "play_media", {
-                # "entity_id": media_player,
-                # "media_content_id": "837",      # Launch the YouTube App
-                # "media_content_type": "app",
-                # "extra": {
-                    # "content_id": workout.get("ytId"),    # Deep-link to the specific video
-                    # "media_type": "live"       # This tells YouTube to start playback
-                # }
-            # })
-
-
-
-
-
-
-
-
-
         if media_player:
+            start_time = workout.get("startTime", 0)
+
             registry = er.async_get(hass)
             entity_entry = registry.async_get(media_player)
             platform = entity_entry.platform if entity_entry else "unknown"
@@ -187,7 +104,8 @@ async def async_setup_entry(hass: HomeAssistant, entry):
                     "media_content_type": "app",
                     "extra": {
                       "content_id": workout.get("ytId"),
-                      "media_type": "live"
+                      "media_type": "live",
+                      "t": str(start_time)
                     }
                 }
 
@@ -196,7 +114,8 @@ async def async_setup_entry(hass: HomeAssistant, entry):
                 # We pass a JSON-formatted string as the ID
                 cast_data = json.dumps({
                     "app_name": "youtube",
-                    "media_id": workout.get("ytId")
+                    "media_id": workout.get("ytId"),
+                    "startTime": start_time
                 })
                 service_data = {
                     "entity_id": media_player,
@@ -206,36 +125,23 @@ async def async_setup_entry(hass: HomeAssistant, entry):
 
             else:
                 # Strategy: Generic URL (Best for Browser Mod or VLC)
+                timestamped_url = f"{video_url}&t={start_time}s"
                 service_data = {
                     "entity_id": media_player,
-                    "media_content_id": workoutUrl,
+                    "media_content_id": timestamped_url,
                     "media_content_type": "url"
                 }
 
-
             await hass.services.async_call("media_player", "play_media", service_data)
-            
+
             # TODO: test this
             # TODO: add as a configuration option of some sort?
             await hass.services.async_call("media_player", "media_pause", {
                 "entity_id": media_player
             })
 
+    # Only register the service if it hasn't been registered yet
+    if not hass.services.has_service(DOMAIN, "pick_random"):
+        hass.services.async_register(DOMAIN, "pick_random", pick_random_workout)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    hass.services.async_register(DOMAIN, "pick_random", pick_random_workout)
-
-    # IMPORTANT: must return a bool
     return True

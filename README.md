@@ -87,6 +87,12 @@ python validate_workouts.py your-list-4.json.
 
 ## Changelog
 
+### 1.0.2
+- Bug Fix: only the first entity would work
+- Feature: start videos at specified `startTime` in the JSON
+- Enhancement: ensure entity IDs are unique
+- Logging and code cleanup
+
 ### 1.0.1
 - Improve entity creation to accept 2 fields vs pipe delinated.
 - Ability to edit an entity configuration
@@ -98,12 +104,15 @@ python validate_workouts.py your-list-4.json.
 ## Roadmap / TODOs
 
 ### Entites
-1. [DONE v1.0.1] Ability to define the category and JSON path in different fields
-2. Category name is case sensitive.  This should be removed/avoided.
+1. [DONE 1.0.1] Ability to define the category and JSON path in different fields
+2. [DONE 1.0.2] Category name is case sensitive.  This should be removed/avoided.
+
+### Videos
+1. [DONE 1.0.2] Start at a specific time
 
 ### Automation
 1. When adding to an automation, need to be able to specify the category
-2. Pause vieo upon load
+2. Pause video upon load
 3. Can we avoid playing ads in anyway? (is this an issue?)
 
 ### Dashboards
