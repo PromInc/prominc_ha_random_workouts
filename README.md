@@ -45,39 +45,47 @@ This integration is designed to be "plug and play" with the following devices:
 ## Configuration
 1. Go to **Settings > Devices & Services**.
 2. Click **Add Integration** and search for **PromInc Random Workouts**.
-3. Enter your lists in the following format:
-   - `CategoryName|https://yourdomain.com/list.json`
+3. Click into **PromInc Random Workouts**.
+4. Click the **Add device** button.
+5. Enter a **category_name**.  This is the name that will be referenced in the automations.
+6. Enter a **json_url** where the list of YouTube videos to play will come from.
+7. Click the **Submit** button.
 
 ## Usage
 
-### 1. Automation Path (Smart TV)
+### 1. Automation (Smart TV)
 To automatically play a workout on your TV (e.g., at 7:00 AM), use the following service call in your automation:
 
-```yaml
-service: prominc_ha_random_workouts.pick_random
-data:
-  entity_id: media_player.living_room_tv
-```
+Set the `entity_id` to that of your media player.
+Set the `category` to the category defined in one of your entities.
 
-#### V2
 ```yaml
 action: prominc_ha_random_workouts.pick_random
 metadata: {}
 data:
-  entity_id: media_player.family_room_50_tcl_roku_tv
+  entity_id: media_player.family_room_tv
   category: yoga
 ```
 
-### 2. Dashboard Path
+If editing in visual mode, the following is needed to be set in the **Action Data** section.
 
-TODO: fill me out
+```yaml
+entity_id: media_player.family_room_tv
+category: core
+```
 
+### 2. Dashboard
+1. Open the desired dashboard in editor mode
+2. Click the **+** icon to add a card
+3. Search for and select card **PromInc Workout Card**
+4. Under the **Config** tab select the workout entity from the dropdown
+5. *optional* Select **Thhumbnail mode** to load a clickable thumbnail of the video as opposed to an iframe.  Useful on mobile devices to open the YouTube app.
+6. Click **Save**
 
 ## NOTES
 1. For a Roku TV, it is recommended to enable "Fast TV Start" in the Roku settings. This keeps the network active even when the TV is "off" and often helps bypass the splash screens when a deep link is sent from Home Assistant.
 2. TCL Roku TV check: `Settings > System > Advanced System Settings > Control by Mobile Devices > Network Access`
    Ensure this is set to "Default" or "Permissive". If it is set to "Disabled," the TV will reject all API calls from Home Assistant, resulting in that "Invalid Response" error.
-
 
 ### Validate JSON Files
 Run this command in a terminal window to validate that the JSON files are formatted correctly.
@@ -86,6 +94,9 @@ python validate_workouts.py your-list-4.json.
 ```
 
 ## Changelog
+
+### 1.0.3
+- Feature: Add dashboard card
 
 ### 1.0.2
 - Bug Fix: only the first entity would work
@@ -116,7 +127,7 @@ python validate_workouts.py your-list-4.json.
 3. Can we avoid playing ads in anyway? (is this an issue?)
 
 ### Dashboards
-1. Does this work?
+1. [DONE 1.0.3] Does this work?
 
 ### Validation Script
 1. Match the format that I use in JSON - not the format that the script is currently formatting to
@@ -131,7 +142,5 @@ https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
 ### Documentation
 Some exists, does it need improvement??
 1. How to build/structure JSON files
-2. Example automation YAML
-3. Example dashboard YAML
-4. Example on how to validate JSON
+2. Example on how to validate JSON
 

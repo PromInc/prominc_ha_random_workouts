@@ -1,9 +1,11 @@
 import logging
 import random
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import DOMAIN, CONF_JSON_URLS
 
 _LOGGER = logging.getLogger(__name__)
@@ -140,8 +142,20 @@ async def async_setup_entry(hass: HomeAssistant, entry):
                 "entity_id": media_player
             })
 
-    # Only register the service if it hasn't been registered yet
+    # Only register the service and frontend resources once
     if not hass.services.has_service(DOMAIN, "pick_random"):
         hass.services.async_register(DOMAIN, "pick_random", pick_random_workout)
+
+        # Updated for 2025.8.3: Use 'path' instead of 'local_path'
+        await hass.http.async_register_static_paths([
+            StaticPathConfig(
+                url_path="/prominc_workouts/prominc-random-workout-card.js",
+                path=hass.config.path("custom_components/prominc_ha_random_workouts/dist/card-workout.js"),
+                cache_headers=False
+            )
+        ])
+
+        # Register the URL in Lovelace resources
+        add_extra_js_url(hass, "/prominc_workouts/prominc-random-workout-card.js")
 
     return True

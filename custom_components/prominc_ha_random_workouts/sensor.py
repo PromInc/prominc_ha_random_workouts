@@ -11,19 +11,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class WorkoutCategorySensor(SensorEntity):
     def __init__(self, category, url):
         self._category = category
-        self._attr_name = f"Workout {category}"from homeassistant.components.sensor import SensorEntity
-from homeassistant.core import callback
-from .const import DOMAIN, CONF_JSON_URLS
-
-async def async_setup_entry(hass, entry, async_add_entities):
-    # Just create the one sensor for this specific config entry
-    name = entry.data.get("category_name")
-    url = entry.data.get("json_url")
-    async_add_entities([WorkoutCategorySensor(name, url)])
-
-class WorkoutCategorySensor(SensorEntity):
-    def __init__(self, category, url):
-        self._category = category
         self._attr_name = f"Workout {category}"
         self._attr_unique_id = f"{DOMAIN}_{category.lower()}"
         self._state = "Ready"
